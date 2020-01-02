@@ -4,3 +4,4 @@
 */.paket
 */paket-files
 .ionide/*
+*/.vscode
