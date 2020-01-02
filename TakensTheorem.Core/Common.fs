@@ -18,5 +18,5 @@ module Common =
             |> Array.length
         Array2D.init l1 l2 (fun x y -> source.[x].[y])
 
-    let (!>) (source: DataFrameColumn) = source :?> PrimitiveDataFrameColumn<_>
-    let (!>!) (source: DataFrameColumn) = source :?> StringDataFrameColumn
+    // let (!>) (source: DataFrameColumn) = source :?> PrimitiveDataFrameColumn<_>
+    // let (!>!) (source: DataFrameColumn) = source :?> StringDataFrameColumn
