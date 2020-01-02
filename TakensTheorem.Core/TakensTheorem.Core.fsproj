@@ -1,10 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Common.fs" />
     <Compile Include="Takens.fs" />
+    <Compile Include="DataFrameColumnOperators.fs" />
+    <Compile Include="DataFrameColumn.fs" />
     <Compile Include="DataFrame.fs" />
     <Compile Include="ZipHelper.fs" />
     <Compile Include="Chart.fs" />

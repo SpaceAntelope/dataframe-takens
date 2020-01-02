@@ -3,7 +3,7 @@
 open System
 open TakensTheorem.Core
 open TakensTheorem.Core.ZipHelper
-open TakensTheorem.Core.Common
+open TakensTheorem.Core.DataFrameColumnOperators
 open Microsoft.Data.Analysis
 
 module Main =

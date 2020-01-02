@@ -25,6 +25,8 @@
     <Compile Include="PythonEquipotenceTests.fs" />
     <Compile Include="DataFrameTests.fs" />
     <Compile Include="DataFrameGenericTrimTests.fs" />
+    <Compile Include="DataFrameColumnOperatorTests.fs" />
+    <Compile Include="DataFrameColumnTests.fs" />
     <!-- <Compile Include="Program.fs" /> -->
   </ItemGroup>
   <ItemGroup>

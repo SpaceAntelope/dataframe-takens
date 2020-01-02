@@ -7,6 +7,7 @@ module PythonEquipotenceTests =
     open Microsoft.Data.Analysis
     open TakensTheorem.Core
     open TakensTheorem.Core.Common    
+    open TakensTheorem.Core.DataFrameColumnOperators
 
     [<Fact>]
     let ``Embeddings same results as in python``() =
