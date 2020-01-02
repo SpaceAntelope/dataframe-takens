@@ -1,0 +1,11 @@
+source https://api.nuget.org/v3/index.json
+
+
+generate_load_scripts: true
+generate_load_scripts_type: fsx
+storage: none
+framework: netcore3.0, netcore2.0, netstandard2.0, netstandard2.1
+
+nuget System.ComponentModel.Composition
+nuget Microsoft.Data.Analysis
+nuget NumSharp

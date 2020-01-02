@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Common.fs" />
+    <Compile Include="Takens.fs" />
+    <Compile Include="DataFrame.fs" />
+    <Compile Include="ZipHelper.fs" />
+    <Compile Include="Chart.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="microsoft.data.analysis" Version="0.2.0" />
+    <PackageReference Include="numsharp" Version="0.20.4" />
+    <PackageReference Include="XPlot.Plotly" Version="3.0.1" />
+  </ItemGroup>
+</Project>
