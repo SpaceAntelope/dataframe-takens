@@ -17,7 +17,6 @@ type CommonTests() =
         let addDays (dt:DateTime) = dt.AddDays(1.0)
         let addHours (dt:DateTime) = dt.AddHours(1.0)
 
-
         let data = TheoryData<DateTime,DateTime, DateTime->DateTime>()
         data.Add(DateTime(2020, 1, 1), DateTime(2020, 12, 31), addDays)
         data.Add(DateTime(2020, 10, 1), DateTime(2021, 1, 31), addDays)
@@ -37,5 +36,6 @@ type CommonTests() =
         Assert.Equal(start, range |> Array.head)
         Assert.Equal(stop, range |> Array.last)
         //Assert.Equal(span.Days + 1, range |> Array.length)
+    
      
     

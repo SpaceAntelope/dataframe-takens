@@ -22,6 +22,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <Compile Include="CommonTests.fs" />
+    <Compile Include="KaggleTests.fs" />
     <Compile Include="PythonEquipotenceTests.fs" />
     <Compile Include="DataFrameTests.fs" />
     <Compile Include="DataFrameGenericTrimTests.fs" />
