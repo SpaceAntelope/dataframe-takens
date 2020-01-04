@@ -136,7 +136,7 @@ module DataFrameColumn =
 
             for k in range do
                 if (probInBin.ContainsKey >> not) k then
-                    let filter = (shortData />= (xmin + k * sizeBin)) /& (shortData /< (xmin + (k + 1.) * sizeBin))
+                    let filter = (shortData >= (xmin + k * sizeBin)) /& (shortData /< (xmin + (k + 1.) * sizeBin))
                     conditionBin.Add(k, filter)
                     probInBin.Add
                         (k,

@@ -84,3 +84,20 @@ module DataFrameColumnTests =
 
         Assert.NotEmpty(actual)
         Assert.Equal<Nullable<DateTime> []>(expected, actual)
+
+    [<Fact>]
+    let ``Check operator overloading``() =
+        let column = [ 10 .. 20 ] |> DataFrameColumn.FromValues ""
+        let value = 100
+
+        let actual =
+            !>(!<column + value)
+            |> DataFrameColumn.Values
+            |> Array.map (fun x -> x.Value)
+        Assert.Equal<int []>([| 110 .. 120 |], actual)
+
+        let actual =
+            !>(value + !<column)
+            |> DataFrameColumn.Values
+            |> Array.map (fun x -> x.Value)
+        Assert.Equal<int []>([| 110 .. 120 |], actual)
