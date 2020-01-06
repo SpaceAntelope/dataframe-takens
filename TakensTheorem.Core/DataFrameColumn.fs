@@ -14,10 +14,12 @@ type DataFrameColumn<'T when 'T :> ValueType and 'T: struct and 'T: (new: unit -
         |> Seq.cast<Nullable<'T>>
         |> Array.ofSeq
 
+
     static member Slice(start: int64, stop: int64) =
         fun (source: PrimitiveDataFrameColumn<'T>) ->
             let data = Array.init (int (stop - start) + 1) (fun i -> source.[start + int64 i])
             PrimitiveDataFrameColumn<'T>(source.Name, data)
+
 
     static member Trim(trimValue: 'T) =
         fun (source: PrimitiveDataFrameColumn<'T>) ->
@@ -81,6 +83,7 @@ module StringDataFrameColumn =
 [<RequireQualifiedAccess>]
 module DataFrameColumn =
     open DataFrameColumnOperators
+    open Common.Dictionary
 
     let Rolling<'T when 'T :> ValueType> windowSize (groupFunction: 'T [] -> 'T) (source: DataFrameColumn) =
         source
@@ -100,6 +103,25 @@ module DataFrameColumn =
     let Filter (filter: PrimitiveDataFrameColumn<bool>) (source: DataFrameColumn) = source.Clone(filter)
 
     let Length(source: DataFrameColumn) = source.Length
+    
+    let RightShift shiftLength fillValue (source: DataFrameColumn) =
+        let result = source.Clone()
+        
+        for n in 0L .. (source.Length - 1L) do
+            if n < shiftLength then result.[n] <- fillValue
+            else result.[n] <- source.[n - shiftLength] 
+        
+        result
+
+    let LeftShift shiftLength fillValue (source: DataFrameColumn) =
+        let result = source.Clone()
+        
+        for n in 0L .. (source.Length - 1L) do
+            if n >= source.Length - shiftLength then result.[n] <- fillValue
+            else result.[n] <- source.[n + shiftLength] 
+        
+        result
+        
 
     let MutualInformation delay (nBins: int) (data: PrimitiveDataFrameColumn<float>) =
         let mutable I = 0.0
@@ -117,45 +139,42 @@ module DataFrameColumn =
 
         let range = [ 0 .. nBins - 1 ] |> List.map float
         for h in range do
-            if (probInBin.ContainsKey >> not) h then
+            if h |> notIn probInBin then
                 //let sub1 = shortData.ElementwiseGreaterThanOrEqual(xmin + h * sizeBin)
                 //let sub2 = shortData.ElementwiseLessThan(xmin + (h + 1.) * sizeBin)
                 //conditionBin.Add(h, sub1.And(sub2) :?> PrimitiveDataFrameColumn<bool>)
 
-                let filter = (shortData />= (xmin + h * sizeBin)) /& (shortData /< (xmin + (h + 1.) * sizeBin))
-                conditionBin.Add(h, filter)
+                let filter = (shortData />= (xmin + h * sizeBin)) /&/ (shortData /< (xmin + (h + 1.) * sizeBin))
+                conditionBin |> update (h, filter)
 
-                //let pib = float ((!>! shortData).Clone(filter).Length) / float shortData.Length
-                probInBin.Add
-                    (h,
-                     (shortData
-                      |> Filter filter
-                      |> Length
-                      |> float)
-                     / float shortData.Length)
+                //let pib = float ((!< shortData).Clone(filter).Length) / float shortData.Length
+                let probability =
+                    (shortData
+                     |> Filter filter
+                     |> Length
+                     |> float) / float shortData.Length
+
+                probInBin |> update (h, probability)
 
             for k in range do
-                if (probInBin.ContainsKey >> not) k then
-                    let filter = (shortData >= (xmin + k * sizeBin)) /& (shortData /< (xmin + (k + 1.) * sizeBin))
-                    conditionBin.Add(k, filter)
-                    probInBin.Add
-                        (k,
-                         (shortData
-                          |> Filter filter
-                          |> Length
-                          |> float)
-                         / float shortData.Length)
+                if k |> notIn probInBin then
+                    let filter = (shortData />= (xmin + k * sizeBin)) /&/ (shortData /< (xmin + (k + 1.) * sizeBin))
+                    let pib = float ((!<shortData).Clone(filter).Length) / float shortData.Length
+                    conditionBin |> update (k, filter)
+                    probInBin |> update (k, pib)
 
-                if (conditionDelayBin.ContainsKey >> not) k then
-                    conditionDelayBin.Add
-                        (k, (delayData />= (xmin + k * sizeBin)) /& (delayData /< (xmin + (k + 1.) * sizeBin)))
+                if k |> notIn conditionDelayBin then
+                    let filter = (delayData />= (xmin + k * sizeBin)) /&/ (delayData /< (xmin + (k + 1.) * sizeBin))
+                    conditionDelayBin |> update (k, filter)
+                
                 let Phk =
-                    float shortData.Length
-                    |> (/)
-                    <| shortData
-                    |> Filter(conditionBin.[h] /& conditionDelayBin.[k])
-                    |> Length
-                    |> float
+                    (* With Pandas the right shifting of the right operand happens implicitly,
+                       as the prexisting indices are matched 
+                     *)
+                    (shortData
+                     |> Filter(conditionBin.[h] /&/ !>(RightShift delay false conditionDelayBin.[k]))
+                     |> Length
+                     |> float) / float shortData.Length
 
                 if Phk <> 0. && probInBin.[h] <> 0. && probInBin.[k] <> 0. then
                     I <- I - (Phk * Math.Log(Phk / (probInBin.[h] * probInBin.[k])))

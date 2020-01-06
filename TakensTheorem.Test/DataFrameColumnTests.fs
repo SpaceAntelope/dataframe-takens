@@ -101,3 +101,66 @@ module DataFrameColumnTests =
             |> DataFrameColumn.Values
             |> Array.map (fun x -> x.Value)
         Assert.Equal<int []>([| 110 .. 120 |], actual)
+
+    [<Fact>]
+    let ``LeftShift primitive column``() =
+        let column = [ 1 .. 10 ] |> DataFrameColumn.FromValues "col"
+
+        let expected = [| 5; 6; 7; 8; 9; 10; -1; -1; -1; -1 |] |> Array.map Nullable
+
+        let actual =
+            column
+            |> DataFrameColumn.LeftShift 4L -1
+            |> (!>)
+            |> DataFrameColumn.Values
+
+        Assert.Equal<Nullable<int> []>(expected, actual)
+
+    [<Fact>]
+    let ``LeftShift string column``() =
+        let column =
+            [ 1 .. 10 ]
+            |> Seq.map string
+            |> StringDataFrameColumn.FromValues "col"
+
+        let expected = [| 5; 6; 7; 8; 9; 10; -1; -1; -1; -1 |] |> Array.map string
+
+        let actual =
+            column
+            |> DataFrameColumn.LeftShift 4L "-1"
+            |> (!>!)
+            |> StringDataFrameColumn.Values
+
+        Assert.Equal<string []>(expected, actual)
+
+    [<Fact>]
+    let ``RightShift primitive column``() =
+        let column = [ 1 .. 10 ] |> DataFrameColumn.FromValues "col"
+
+        let expected = [| -1; -1; -1; -1; 1; 2; 3; 4; 5; 6 |] |> Array.map Nullable
+
+        let actual =
+            column
+            |> DataFrameColumn.RightShift 4L -1
+            |> (!>)
+            |> DataFrameColumn.Values
+
+        Assert.Equal<Nullable<int> []>(expected, actual)
+
+    [<Fact>]
+    let ``RightShift string column``() =
+        let column =
+            [ 1 .. 10 ]
+            |> Seq.map string
+            |> StringDataFrameColumn.FromValues "col"
+
+        let expected = [| -1; -1; -1; -1; 1; 2; 3; 4; 5; 6 |] |> Array.map string
+
+        let actual =
+            column
+            |> DataFrameColumn.RightShift 4L "-1"
+            |> (!>!)
+            |> StringDataFrameColumn.Values
+
+        Assert.Equal<string []>(expected, actual)
+ 

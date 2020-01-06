@@ -6,7 +6,7 @@ module PythonEquipotenceTests =
     open Xunit
     open Microsoft.Data.Analysis
     open TakensTheorem.Core
-    open TakensTheorem.Core.Common    
+    open TakensTheorem.Core.Common
     open TakensTheorem.Core.DataFrameColumnOperators
 
     [<Fact>]
@@ -30,7 +30,7 @@ module PythonEquipotenceTests =
                               |> fun values -> PrimitiveDataFrameColumn<DateTime>(indexName, values)
 
         let actual =
-            tempDF.["Montreal"]  :?> PrimitiveDataFrameColumn<single>
+            tempDF.["Montreal"] :?> PrimitiveDataFrameColumn<single>
             |> DataFrameColumn.TakensEmbedding<single> delay dimension //data
             |> Seq.map Array.ofSeq
             |> Array.ofSeq
@@ -82,8 +82,7 @@ module PythonEquipotenceTests =
                                dataTypes =
                                    [| typeof<string>
                                       typeof<float> |], columnNames = [| "datetime"; "Montreal" |], header = true)
-                      .DropNulls(DropNullOptions.Any))
-                      .["Montreal"] 
+                      .DropNulls(DropNullOptions.Any)).["Montreal"]
             |> (!>)
             |> DataFrameColumn<float>.Values
             |> Seq.map string
@@ -99,28 +98,26 @@ module PythonEquipotenceTests =
                                dataTypes =
                                    [| typeof<string>
                                       typeof<float> |], columnNames = [| "datetime"; "Montreal" |], header = true)
-                      .DropNulls(DropNullOptions.Any))
-                      .["Montreal"]
+                      .DropNulls(DropNullOptions.Any)).["Montreal"]
             |> (!>)
             |> DataFrameColumn<float>.Values
             |> Array.ofSeq
 
         let actual =
             DataFrame.LoadCsv(@"expected\MontrealSlice.csv",
-                dataTypes =
-                     [| typeof<string>
-                        typeof<float> |], columnNames = [| "datetime"; "Montreal" |])
-                .["Montreal"]
+                              dataTypes =
+                                 [| typeof<string>
+                                    typeof<float> |], 
+                              columnNames = [| "datetime"; "Montreal" |])
+                      .["Montreal"]
             |> DataFrameColumn.Rolling<float> 24 (Seq.average)
             |> Seq.map Nullable
             |> Array.ofSeq
 
         for i in 0 .. expected.Length - 1 do
-            if expected.[i].HasValue 
-            then 
-                Assert.Equal(expected.[i].Value, actual.[i].Value, 6)
-            else 
-                Assert.False(actual.[i].HasValue)
+            if expected.[i].HasValue
+            then Assert.Equal(expected.[i].Value, actual.[i].Value, 6)
+            else Assert.False(actual.[i].HasValue)
 
 
     [<Fact>]
@@ -141,3 +138,42 @@ module PythonEquipotenceTests =
         Assert.Equal<Type []>
             ([| typeof<string>
                 typeof<float> |], types)
+
+    [<Fact>]
+    let ``Mutual Information Calculation for montreal high pass filtered data``() =
+        let frame =
+            DataFrame.LoadCsv (
+                "data/montreal_high_pass_filtered.csv", 
+                dataTypes = [| typeof<string>; typeof<float> |],
+                columnNames = [| "datetime"; "Montreal" |], header = false)
+        
+        let column = frame.["Montreal"] :?> PrimitiveDataFrameColumn<float>
+
+        let expected = [|
+            -2.6123319429357847
+            -2.6105622604978813
+            -2.6084167859085237
+            -2.6062719339399316
+            -2.604121512212586
+            -2.602125548325199
+            -2.600248996403993
+            -2.598372588327039
+            -2.596551096868427
+            -2.5946066618393084
+            -2.5926609733607022
+            -2.5906467769276964
+            -2.5883990428231463
+            -2.586143083176258
+            -2.5840835409427254
+            -2.582044793030632
+            -2.580004287731667
+            -2.577910562566282
+            -2.5758162830222617
+            -2.573721462584162
+        |]
+
+        let actual = [|for i in 1L..20L do DataFrameColumn.MutualInformation i 16 column|]
+
+        Assert.Equal<float[]>(expected, actual)
+        
+ 

@@ -41,3 +41,14 @@ module DataFrameColumnOperatorTests =
         let actual = col /> value
 
         Assert.Equal<Nullable<bool> []>(expected |> DataFrameColumn.Values, actual |> DataFrameColumn.Values)
+
+    [<Fact>]
+    let ``Bitwise global AND operator``()=
+        let left =     [1;1;0;1;0] |> List.map((=)1) |> DataFrameColumn.FromValues ""
+        let right =    [1;1;1;0;0] |> List.map((=)1) |> DataFrameColumn.FromValues ""
+        let expected = [1;1;0;0;0] |> List.map((=)1) |> Array.ofList //|> DataFrameColumn.FromValues ""
+        
+        let actual = (left /&/ right) |> DataFrameColumn.Values |> Array.map (fun i -> i.Value)        
+        Assert.Equal<bool[]>(expected, actual)
+        let actual = (right /&/ left) |> DataFrameColumn.Values |> Array.map (fun i -> i.Value)        
+        Assert.Equal<bool[]>(expected, actual)
