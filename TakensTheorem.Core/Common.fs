@@ -3,6 +3,7 @@ namespace TakensTheorem.Core
 open System
 open XPlot.Plotly
 open Microsoft.Data.Analysis
+open System.Collections.Generic
 
 module Common =
     let dateRange (start: DateTime) (stop: DateTime) (next: DateTime -> DateTime) =
@@ -18,5 +19,12 @@ module Common =
             |> Array.length
         Array2D.init l1 l2 (fun x y -> source.[x].[y])
 
+    module Dictionary =
+        let notIn (dic: IDictionary<'T, _>) (key: 'T) = (dic.ContainsKey >> not) key
+        
+        let update (key: 'TKey, value: 'TValue) (dic: IDictionary<'TKey, 'TValue>) =
+            if key |> notIn dic then dic.Add(key, value) else dic.[key] <- value
+                
+    // let inline (/!) (key: 'T) (dic: IDictionary<'T, _>): bool = (dic.ContainsKey >> not) key
     // let (!>) (source: DataFrameColumn) = source :?> PrimitiveDataFrameColumn<_>
     // let (!>!) (source: DataFrameColumn) = source :?> StringDataFrameColumn
