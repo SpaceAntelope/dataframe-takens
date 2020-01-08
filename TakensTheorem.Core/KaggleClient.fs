@@ -12,9 +12,9 @@ module KaggleClient =
 
     type AuthorizedClient = AuthorizedClient of HttpClient
 
-    type Credentials =
-        { Username: string
-          Key: string }
+    type Credentials() =
+        member val username: string = null with get, set
+        member val key: string = null with get, set
         static member LoadFrom(path: string): Credentials =
             use reader = new StreamReader(path)
             let json = reader.ReadToEnd()
@@ -22,7 +22,7 @@ module KaggleClient =
 
     let CreateAuthorizedClient(auth: Credentials) =
         let authToken =
-            sprintf "%s:%s" auth.Username auth.Key
+            sprintf "%s:%s" auth.username auth.key
             |> Text.ASCIIEncoding.ASCII.GetBytes
             |> Convert.ToBase64String
 
@@ -49,7 +49,7 @@ module KaggleClient =
             let bufferLength = 4092
             use! response = client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
                             |> Async.AwaitTask
-            
+
             response.EnsureSuccessStatusCode() |> ignore
 
             let total =
