@@ -15,10 +15,15 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None> -->
   </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="microsoft.data.analysis" Version="0.2.0" />
     <PackageReference Include="numsharp" Version="0.20.4" />
     <PackageReference Include="System.Text.Json" Version="4.7.0" />
     <PackageReference Include="XPlot.Plotly" Version="3.0.1" />
   </ItemGroup>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy bin\Debug\netstandard2.0\TakensTheorem.Core.dll ..\Notebooks\TakensTheorem.Core.dll" />
+  </Target>
 </Project>

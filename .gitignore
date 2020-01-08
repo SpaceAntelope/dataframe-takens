@@ -1,8 +1,12 @@
 */bin
 */obj
 */.ionide
+.ionide
 */.paket
 */paket-files
 .ionide/*
 */.vscode
-TakensTheorem.Core/kaggle.json
+*/kaggle.json
+Notebooks/.ipynb_checkpoints
+.vs
+Notebooks/TakensTheorem.Core.dll

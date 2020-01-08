@@ -31,7 +31,7 @@ module KaggleClient =
 
         AuthorizedClient client
 
-    let DownLoadFileAsync (urlPath: string[]) destinationFolder (AuthorizedClient client) =
+    let DownLoadFileAsync (urlPath: string []) destinationFolder (AuthorizedClient client) =
         let url = sprintf "%sdatasets/download/%s" BaseApiUrl <| String.Join("/", urlPath)
         let filename = urlPath |> Array.last
 
@@ -42,3 +42,40 @@ module KaggleClient =
             fstream.Close()
             stream.Close()
         }
+
+    let DownloadFileAsync (url: string) (destinationFile: string) cancellationToken (report: int64 * float -> unit)
+        (client: HttpClient) =
+        async {
+            let bufferLength = 4092
+            use! response = client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
+                            |> Async.AwaitTask
+            
+            response.EnsureSuccessStatusCode() |> ignore
+
+            let total =
+                if response.Content.Headers.ContentLength.HasValue
+                then response.Content.Headers.ContentLength.Value
+                else -1L
+                |> float
+
+            use! contentStream = response.Content.ReadAsStreamAsync() |> Async.AwaitTask
+            use fileStream =
+                new FileStream(destinationFile, FileMode.Create, FileAccess.Write, FileShare.None, bufferLength, true)
+
+            let mutable totalRead = 0L
+            let mutable totalReads = 0L
+            let mutable isMoreToRead = true
+            let buffer = Array.create bufferLength 0uy
+
+            while isMoreToRead && not cancellationToken.IsCancellationRequested do
+                let! read = contentStream.ReadAsync(buffer, 0, bufferLength) |> Async.AwaitTask
+                if read > 0 then
+                    do! fileStream.WriteAsync(buffer, 0, read) |> Async.AwaitTask
+                    totalRead <- totalRead + int64 read
+                    totalReads <- totalReads + 1L
+                else
+                    isMoreToRead <- false
+
+                report (totalRead, float totalRead / total)
+        }
+ 
