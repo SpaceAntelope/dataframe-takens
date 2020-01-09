@@ -12,7 +12,7 @@ open FSharp.Control.Tasks.V2
 module KaggleClient =
     let BaseApiUrl = "https://www.kaggle.com/api/v1/"
 
-    let DownloadUrl user filename = sprintf "%sdatasets/download/%s/%s" BaseApiUrl user filename
+    let DownloadDatasetUrl user filename = sprintf "%sdatasets/download/%s/%s" BaseApiUrl user filename
 
     type AuthorizedClient = AuthorizedClient of HttpClient
 
@@ -61,7 +61,7 @@ module KaggleClient =
                 else -1L
                 |> float
 
-            use! contentStream = response.Content.ReadAsStreamAsync() 
+            use! contentStream = response.Content.ReadAsStreamAsync()
             use fileStream =
                 new FileStream(destinationFile, FileMode.Create, FileAccess.Write, FileShare.None, bufferLength, true)
 
@@ -71,9 +71,9 @@ module KaggleClient =
             let buffer = Array.create bufferLength 0uy
 
             while isMoreToRead && not cancellationToken.IsCancellationRequested do
-                let! read = contentStream.ReadAsync(buffer, 0, bufferLength) 
+                let! read = contentStream.ReadAsync(buffer, 0, bufferLength)
                 if read > 0 then
-                    do! fileStream.WriteAsync(buffer, 0, read) 
+                    do! fileStream.WriteAsync(buffer, 0, read)
                     totalRead <- totalRead + int64 read
                     totalReads <- totalReads + 1L
                 else
@@ -81,7 +81,7 @@ module KaggleClient =
 
                 report (totalRead, float totalRead / total)
         }
- 
+
 
     let DownloadFileAsync (url: string) (destinationFile: string) cancellationToken (report: int64 * float -> unit)
         (client: HttpClient) =
@@ -118,4 +118,13 @@ module KaggleClient =
 
                 report (totalRead, float totalRead / total)
         }
+
+    
+
+    let inline (=>) (key: string) value = key, box value
+
+    type Style([<ParamArray>] props: (string * obj) []) =
+        let _props = props
+        override _.ToString() =
+            Array.fold (fun state (key, value) -> sprintf "%s; %s: %A" state key value) "" _props
  

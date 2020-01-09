@@ -9,11 +9,17 @@ open KaggleClient
 
 module KaggleTests =
 
-    // let dataPath = "../../../../Data"
-    // let dataUrl = KaggleClient.DownloadUrl "selfishgene" "historical-hourly-weather-data.zip"
+    let dataPath = "../../../../Data"
+    let filename = "historical-hourly-weather-data.zip"
+    let user = "selfishgene"
+    let dataUrl = DownloadDatasetUrl user filename
     // [<Fact>]
-    // let ``Download data`` () =
-    //     if File.Exists>>not
+    let ``Download data`` () =
+            let destinationPath = sprintf "%s/%s" dataPath filename
+            if (File.Exists>>not) destinationPath
+            then 
+                
+
     //     //Assert.Equal(Path.GetFullPath dataPath), "")
     //     Assert.True(Directory.Exists dataPath)
     //     if (List.exists (String.IsNullOrEmpty) [username;key])
