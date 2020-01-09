@@ -6,9 +6,13 @@ open System.Text.Json.Serialization
 open System
 open System.IO
 open System.Net.Http.Headers
+open FSharp.Control.Tasks.V2
+
 
 module KaggleClient =
     let BaseApiUrl = "https://www.kaggle.com/api/v1/"
+
+    let DownloadUrl user filename = sprintf "%sdatasets/download/%s/%s" BaseApiUrl user filename
 
     type AuthorizedClient = AuthorizedClient of HttpClient
 
@@ -42,6 +46,42 @@ module KaggleClient =
             fstream.Close()
             stream.Close()
         }
+
+    let DownloadFileAsync2 (url: string) (destinationFile: string) cancellationToken (report: int64 * float -> unit)
+        (client: HttpClient) =
+        task {
+            let bufferLength = 4092
+            use! response = client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
+
+            response.EnsureSuccessStatusCode() |> ignore
+
+            let total =
+                if response.Content.Headers.ContentLength.HasValue
+                then response.Content.Headers.ContentLength.Value
+                else -1L
+                |> float
+
+            use! contentStream = response.Content.ReadAsStreamAsync() 
+            use fileStream =
+                new FileStream(destinationFile, FileMode.Create, FileAccess.Write, FileShare.None, bufferLength, true)
+
+            let mutable totalRead = 0L
+            let mutable totalReads = 0L
+            let mutable isMoreToRead = true
+            let buffer = Array.create bufferLength 0uy
+
+            while isMoreToRead && not cancellationToken.IsCancellationRequested do
+                let! read = contentStream.ReadAsync(buffer, 0, bufferLength) 
+                if read > 0 then
+                    do! fileStream.WriteAsync(buffer, 0, read) 
+                    totalRead <- totalRead + int64 read
+                    totalReads <- totalReads + 1L
+                else
+                    isMoreToRead <- false
+
+                report (totalRead, float totalRead / total)
+        }
+ 
 
     let DownloadFileAsync (url: string) (destinationFile: string) cancellationToken (report: int64 * float -> unit)
         (client: HttpClient) =

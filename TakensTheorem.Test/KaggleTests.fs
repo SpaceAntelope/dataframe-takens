@@ -7,11 +7,15 @@ open TakensTheorem.Core
 open System.IO
 open KaggleClient
 
-module KaggleTests = ()
+module KaggleTests =
 
-    // [<Theory>]
-    // let ``Download data`` (username, key) =
-
+    // let dataPath = "../../../../Data"
+    // let dataUrl = KaggleClient.DownloadUrl "selfishgene" "historical-hourly-weather-data.zip"
+    // [<Fact>]
+    // let ``Download data`` () =
+    //     if File.Exists>>not
+    //     //Assert.Equal(Path.GetFullPath dataPath), "")
+    //     Assert.True(Directory.Exists dataPath)
     //     if (List.exists (String.IsNullOrEmpty) [username;key])
     //     then
     //         Assert.True(true)
@@ -25,3 +29,4 @@ module KaggleTests = ()
     //         |> Async.StartImmediate
 
     //         Assert.True(File.Exists("historical-hourly-weather-data.zip"))
+    ()
