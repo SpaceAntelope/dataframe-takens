@@ -10,3 +10,5 @@
 Notebooks/.ipynb_checkpoints
 .vs
 Notebooks/TakensTheorem.Core.dll
+Notebooks/test.png
+TakensTheorem.Test/TestResults

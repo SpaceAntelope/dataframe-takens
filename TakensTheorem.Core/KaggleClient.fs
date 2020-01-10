@@ -35,7 +35,7 @@ module KaggleClient =
 
         AuthorizedClient client
 
-    let DownLoadFileAsync (urlPath: string []) destinationFolder (AuthorizedClient client) =
+    let DownLoadFileAsyncOld (urlPath: string []) destinationFolder (AuthorizedClient client) =
         let url = sprintf "%sdatasets/download/%s" BaseApiUrl <| String.Join("/", urlPath)
         let filename = urlPath |> Array.last
 
@@ -47,7 +47,7 @@ module KaggleClient =
             stream.Close()
         }
 
-    let DownloadFileAsync2 (url: string) (destinationFile: string) cancellationToken (report: int64 * float -> unit)
+    let DownloadFileAsync (url: string) (destinationFile: string) cancellationToken (report: int64 * float -> unit)
         (client: HttpClient) =
         task {
             let bufferLength = 4092
@@ -83,7 +83,7 @@ module KaggleClient =
         }
 
 
-    let DownloadFileAsync (url: string) (destinationFile: string) cancellationToken (report: int64 * float -> unit)
+    let DownloadFileAsync3 (url: string) (destinationFile: string) cancellationToken (report: int64 * float -> unit)
         (client: HttpClient) =
         async {
             let bufferLength = 4092
@@ -117,14 +117,4 @@ module KaggleClient =
                     isMoreToRead <- false
 
                 report (totalRead, float totalRead / total)
-        }
-
-    
-
-    let inline (=>) (key: string) value = key, box value
-
-    type Style([<ParamArray>] props: (string * obj) []) =
-        let _props = props
-        override _.ToString() =
-            Array.fold (fun state (key, value) -> sprintf "%s; %s: %A" state key value) "" _props
- 
+        }    
