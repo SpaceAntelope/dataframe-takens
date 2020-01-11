@@ -9,6 +9,7 @@
 */kaggle.json
 Notebooks/.ipynb_checkpoints
 .vs
-Notebooks/TakensTheorem.Core.dll
-Notebooks/test.png
+Notebooks/*.dll
+Notebooks/*.png
+Data
 TakensTheorem.Test/TestResults
