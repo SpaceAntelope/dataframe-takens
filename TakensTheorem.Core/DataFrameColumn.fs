@@ -46,6 +46,13 @@ type DataFrameColumn<'T when 'T :> ValueType and 'T: struct and 'T: (new: unit -
 
     static member Plot(source: PrimitiveDataFrameColumn<'T>) = Scatter(y = DataFrameColumn.Values source) |> Chart.Plot
 
+    static member FalseNearestNeighbours delay dimension (data: PrimitiveDataFrameColumn<'T>) =
+        (* Calculates the number of false nearest neighbours of embedding dimension *)
+        let embeddedData = data |> DataFrameColumn.Values |> Takens.Embedding delay dimension
+        let neighbours = Accord.MachineLearning.KNearestNeighbors(2, Distance=Accord.Math.Distances.Minkowski())
+        
+        ()
+
 [<RequireQualifiedAccess>]
 module StringDataFrameColumn =
     let Values(source: StringDataFrameColumn) =
@@ -179,3 +186,5 @@ module DataFrameColumn =
                 if Phk <> 0. && probInBin.[h] <> 0. && probInBin.[k] <> 0. then
                     I <- I - (Phk * Math.Log(Phk / (probInBin.[h] * probInBin.[k])))
         I
+
+    
