@@ -13,3 +13,5 @@ Notebooks/*.dll
 Notebooks/*.png
 Data/*
 TakensTheorem.Test/TestResults
+Notebooks/fsx/paket-files
+Notebooks/fsx/.paket/load
