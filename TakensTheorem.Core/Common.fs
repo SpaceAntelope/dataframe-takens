@@ -28,3 +28,13 @@ module Common =
     // let inline (/!) (key: 'T) (dic: IDictionary<'T, _>): bool = (dic.ContainsKey >> not) key
     // let (!>) (source: DataFrameColumn) = source :?> PrimitiveDataFrameColumn<_>
     // let (!>!) (source: DataFrameColumn) = source :?> StringDataFrameColumn
+
+    let transpose (source: 'a[][]) =
+        let length1 = source |> Array.length
+        let length2 = source |> Array.head |> Array.length
+        Array.init length2 (fun d1 -> Array.init length1 (fun d2 -> source.[d2].[d1]))
+
+    let rec transpose2 = function
+        | (_::_)::_ as M -> List.map List.head M :: transpose2 (List.map List.tail M)
+        | _ -> []        
+    

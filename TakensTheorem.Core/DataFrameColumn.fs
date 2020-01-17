@@ -6,6 +6,7 @@ open Microsoft.Data.Analysis
 open System.Collections.Generic
 open System.IO
 open DataFrameColumnOperators
+open Accord.MachineLearning
 
 type DataFrameColumn<'T when 'T :> ValueType and 'T: struct and 'T: (new: unit -> 'T)> private () =
 
@@ -46,12 +47,7 @@ type DataFrameColumn<'T when 'T :> ValueType and 'T: struct and 'T: (new: unit -
 
     static member Plot(source: PrimitiveDataFrameColumn<'T>) = Scatter(y = DataFrameColumn.Values source) |> Chart.Plot
 
-    static member FalseNearestNeighbours delay dimension (data: PrimitiveDataFrameColumn<'T>) =
-        (* Calculates the number of false nearest neighbours of embedding dimension *)
-        let embeddedData = data |> DataFrameColumn.Values |> Takens.Embedding delay dimension
-        let neighbours = Accord.MachineLearning.KNearestNeighbors(2, Distance=Accord.Math.Distances.Minkowski())
-        
-        ()
+    
 
 [<RequireQualifiedAccess>]
 module StringDataFrameColumn =
@@ -187,4 +183,14 @@ module DataFrameColumn =
                     I <- I - (Phk * Math.Log(Phk / (probInBin.[h] * probInBin.[k])))
         I
 
-    
+    let FalseNearestNeighbours delay dimension (data: PrimitiveDataFrameColumn<float>) =
+        (* Calculates the number of false nearest neighbours of embedding dimension *)
+        let embeddedData = 
+            data 
+            |> DataFrameColumn.Values 
+            |> Takens.Embedding delay dimension 
+            |> Seq.map (Array.map (fun nullable -> float nullable.Value))
+            |> Array.ofSeq
+        let knn = KNearestNeighbors(2).Learn(embeddedData, Array.zeroCreate<int> (embeddedData.Length))
+        
+        ()

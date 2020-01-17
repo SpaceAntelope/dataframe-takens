@@ -27,6 +27,35 @@ type CommonTests() =
         data.Add(DateTime(2081, 10, 10), DateTime(2081, 10, 12), addHours)
         data
 
+    static member MatricesToTranspose =
+        let data = TheoryData<int [] [], int [] []>()
+        data.Add
+            ([| [| 1; 2; 3 |]
+                [| 1; 2; 3 |] |],
+             [| [| 1; 1 |]
+                [| 2; 2 |]
+                [| 3; 3 |] |])
+        data.Add
+            ([| [| 1; 2; 3 |]
+                [| 4; 5; 6 |]
+                [| 7; 8; 9 |] |],
+             [| [| 1; 4; 7 |]
+                [| 2; 5; 8 |]
+                [| 3; 6; 9 |] |])
+        data.Add([| [| 1 |] |], [| [| 1 |] |])
+        data.Add
+            ([| [| 1; 2; 3 |] |],
+             [| [| 1 |]
+                [| 2 |]
+                [| 3 |] |])
+        data.Add
+            ([| [| 1 |]
+                [| 2 |]
+                [| 3 |] |], [| [| 1; 2; 3 |] |])
+        data.Add
+            ([| [||]
+                [||] |], [||])
+        data
 
     [<Theory>]
     [<MemberData("DateCases")>]
@@ -55,12 +84,12 @@ type CommonTests() =
 
     [<Fact>]
     member x.``Update dictionary``() =
-        let cache = Dictionary<string,int>()
+        let cache = Dictionary<string, int>()
 
         [ ("a", 1)
           ("b", 2)
           ("c", 3) ]
-        |> List.iter(cache.Add)
+        |> List.iter (cache.Add)
 
         cache |> update ("a", -1)
         Assert.Equal(cache.["a"], -1)
@@ -68,3 +97,16 @@ type CommonTests() =
         Assert.Equal(cache.["z"], -1)
         cache |> update ("z", -2)
         Assert.Equal(cache.["z"], -2)
+
+    [<Trait("Category", "Common")>]
+    [<Theory>]
+    [<MemberData("MatricesToTranspose")>]
+    member x.``2d dense array transposition`` (source: int [] [], transposed: int [] []) =
+        Assert.Equal<int [] []>(transposed, Common.transpose source)
+
+        let to2dList arr =
+            arr
+            |> Array.map (List.ofArray)
+            |> List.ofArray
+
+        Assert.Equal<int list list>(to2dList transposed, to2dList source |> Common.transpose2)

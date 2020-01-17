@@ -4,6 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Common.fs" />
+    <Compile Include="KNN.fs" />
     <Compile Include="KaggleClient.fs" />
     <Compile Include="Takens.fs" />
     <Compile Include="DataFrameColumnOperators.fs" />
