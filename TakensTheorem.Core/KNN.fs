@@ -5,10 +5,10 @@ module KNN =
 
     let Distances (points: float[][]) (knn: KNearestNeighbors) = 
         [| for point in points do
-            let distance = 
+            let distances = 
                 knn.GetNearestNeighbors point
-                |> fst
+                |> fst // skip label info
                 |> Array.map (fun nbr -> knn.Distance.Distance(nbr, point))
             
-            yield (point, distance) |]
+            yield (point, distances) |]
     

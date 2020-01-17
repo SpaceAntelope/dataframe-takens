@@ -189,8 +189,6 @@ module PythonEquipotenceTests =
             !> frame.["Montreal"]  
             |> DataFrameColumn<float>.Slice(0L, 100L)
         
-        let embeddedData = column |> DataFrameColumn.TakensEmbedding 1 5 
-
         let expectedDistances = [|
             1.1961186825636652; 1.1570174532619988; 0.924713365874955; 0.8416010875854391; 0.8216006872174546; 0.5530012259505771; 0.5426822482535232; 0.6724128428653727; 0.38928696837920523; 
             0.5687269699244578; 0.8550502097017815; 0.992095216399437; 1.163184503522989; 1.6779094719858654; 0.9352754273474005; 0.8289324376038884; 1.0131224766917089; 0.20849272652496934; 0.4270836524389538; 
@@ -211,7 +209,14 @@ module PythonEquipotenceTests =
             |> Takens.Embedding 1 5 
             |> Seq.map (Array.map (fun nullable -> float nullable.Value))
             |> Array.ofSeq
-        let knn = Accord.MachineLearning.KNearestNeighbors(k=2).Learn(embeddedData, Array.zeroCreate<int> (embeddedData.Length))
+            //|> transpose
 
-        ()
+        let actualDistances = 
+            Accord.MachineLearning.KNearestNeighbors(k=2)
+                .Learn(embeddedData, Array.zeroCreate<int> (embeddedData.Length))
+            |> KNN.Distances embeddedData 
+            
+        
+
+        Assert.Equal<float[]>(expectedDistances, actualDistances |> (Array.map snd>>Array.last));
         
