@@ -202,6 +202,15 @@ module PythonEquipotenceTests =
             1.8617847246959534; 1.8617847246959534; 2.188939169438026; 3.3050755113032193; 2.9259276318707106; 2.125951340968723;
         |]
 
+            let expectedIndices = [|
+                [| 0; 48|];[| 1; 49|];[| 2;  3|];[| 3;  2|];[| 4;  5|];[| 5;  6|];[| 6; 75|];[| 7; 28|];[| 8; 56|];[| 9; 57|];[|10; 58|];[|11; 59|];[|12; 60|];[|13; 61|];[|14; 38|];[|15; 39|];[|16; 21|];[|17; 18|];
+                [|18; 17|];[|19; 18|];[|20; 21|];[|21; 20|];[|22; 46|];[|23; 47|];[|24;  0|];[|25; 49|];[|26; 51|];[|27; 52|];[|28;  7|];[|29; 30|];[|30; 29|];[|31; 55|];[|32; 81|];[|33; 82|];[|34; 83|];[|35; 36|];
+                [|36; 35|];[|37; 85|];[|38; 14|];[|39; 15|];[|40; 87|];[|41; 87|];[|42; 88|];[|43; 16|];[|44; 45|];[|45; 18|];[|46; 22|];[|47; 23|];[|48;  0|];[|49;  1|];[|50; 26|];[|51; 26|];[|52; 27|];[|53; 30|];
+                [|54; 30|];[|55;  7|];[|56;  8|];[|57;  9|];[|58; 10|];[|59; 11|];[|60; 12|];[|61; 13|];[|62; 86|];[|63; 87|];[|64; 88|];[|65; 91|];[|66; 91|];[|67; 92|];[|68; 93|];[|69; 44|];[|70; 94|];[|71; 24|];
+                [|72;  1|];[|73; 26|];[|74; 27|];[|75;  6|];[|76; 54|];[|77; 78|];[|78; 79|];[|79; 78|];[|80;  8|];[|81;  8|];[|82; 58|];[|83; 59|];[|84; 60|];[|85; 37|];[|86; 14|];[|87; 40|];[|88; 42|];[|89; 90|];
+                [|90; 89|];[|91; 90|];[|92; 67|];[|93; 69|];[|94; 70|]
+            |]
+
         let embeddedData = 
             column
             |> DataFrameColumn.Values 
@@ -211,9 +220,31 @@ module PythonEquipotenceTests =
             |> transpose
 
         let actualDistances = 
-            Accord.MachineLearning.KNearestNeighbors(k=2)
-                .Learn(embeddedData, Array.zeroCreate<int> (embeddedData.Length))
+            Accord.MachineLearning.KNearestNeighbors(2).Learn(embeddedData, Array.zeroCreate<int> (embeddedData.Length))
             |> KNN.Distances embeddedData 
             |> Array.map (snd>>Array.last)
 
         Assert.Equal<float[]>(expectedDistances, actualDistances)
+            
+        let (distances, indices) = 
+            KNN.DistancesWithIndices 2 embeddedData
+            |> Array.unzip
+                
+        Assert.Equal<float[]>(expectedDistances, distances |> Array.map Array.last)            
+        Assert.Equal<int[][]>(expectedIndices, indices)            
+
+    [<Fact>]
+    let ``False nearest neighbours example ``() =
+        let frame =
+            DataFrame.LoadCsv (
+                "data/montreal_high_pass_filtered.csv", 
+                dataTypes = [| typeof<string>; typeof<float> |],
+                columnNames = [| "datetime"; "Montreal" |], header = false)
+    
+        let column = frame.["Montreal"] :?> PrimitiveDataFrameColumn<float>
+
+        let expected = [|0; 1515; 497; 82; 16; 2; 0|]
+        //[ false_nearest_neighours(filteredWeatherData,1,i) for i in range(0,7)]
+        let actual = Array.init 7 (fun n -> DataFrameColumn.FalseNearestNeighbours 1 n column)
+        
+        Assert.Equal<int[]>(expected, actual)

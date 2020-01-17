@@ -47,7 +47,7 @@ type DataFrameColumn<'T when 'T :> ValueType and 'T: struct and 'T: (new: unit -
 
     static member Plot(source: PrimitiveDataFrameColumn<'T>) = Scatter(y = DataFrameColumn.Values source) |> Chart.Plot
 
-    
+
 
 [<RequireQualifiedAccess>]
 module StringDataFrameColumn =
@@ -106,25 +106,23 @@ module DataFrameColumn =
     let Filter (filter: PrimitiveDataFrameColumn<bool>) (source: DataFrameColumn) = source.Clone(filter)
 
     let Length(source: DataFrameColumn) = source.Length
-    
+
     let RightShift shiftLength fillValue (source: DataFrameColumn) =
         let result = source.Clone()
-        
+
         for n in 0L .. (source.Length - 1L) do
-            if n < shiftLength then result.[n] <- fillValue
-            else result.[n] <- source.[n - shiftLength] 
-        
+            if n < shiftLength then result.[n] <- fillValue else result.[n] <- source.[n - shiftLength]
+
         result
 
     let LeftShift shiftLength fillValue (source: DataFrameColumn) =
         let result = source.Clone()
-        
+
         for n in 0L .. (source.Length - 1L) do
-            if n >= source.Length - shiftLength then result.[n] <- fillValue
-            else result.[n] <- source.[n + shiftLength] 
-        
+            if n >= source.Length - shiftLength then result.[n] <- fillValue else result.[n] <- source.[n + shiftLength]
+
         result
-        
+
 
     let MutualInformation delay (nBins: int) (data: PrimitiveDataFrameColumn<float>) =
         let mutable I = 0.0
@@ -155,7 +153,8 @@ module DataFrameColumn =
                     (shortData
                      |> Filter filter
                      |> Length
-                     |> float) / float shortData.Length
+                     |> float)
+                    / float shortData.Length
 
                 probInBin |> update (h, probability)
 
@@ -169,15 +168,16 @@ module DataFrameColumn =
                 if k |> notIn conditionDelayBin then
                     let filter = (delayData />= (xmin + k * sizeBin)) /&/ (delayData /< (xmin + (k + 1.) * sizeBin))
                     conditionDelayBin |> update (k, filter)
-                
+
                 let Phk =
                     (* With Pandas the right shifting of the right operand happens implicitly,
-                       as the prexisting indices are matched 
+                       as the prexisting indices are matched
                      *)
                     (shortData
                      |> Filter(conditionBin.[h] /&/ !>(RightShift delay false conditionDelayBin.[k]))
                      |> Length
-                     |> float) / float shortData.Length
+                     |> float)
+                    / float shortData.Length
 
                 if Phk <> 0. && probInBin.[h] <> 0. && probInBin.[k] <> 0. then
                     I <- I - (Phk * Math.Log(Phk / (probInBin.[h] * probInBin.[k])))
@@ -185,12 +185,35 @@ module DataFrameColumn =
 
     let FalseNearestNeighbours delay dimension (data: PrimitiveDataFrameColumn<float>) =
         (* Calculates the number of false nearest neighbours of embedding dimension *)
-        let embeddedData = 
-            data 
-            |> DataFrameColumn.Values 
-            |> Takens.Embedding delay dimension 
+        let embeddedData =
+            data
+            |> TakensEmbedding delay dimension
             |> Seq.map (Array.map (fun nullable -> float nullable.Value))
             |> Array.ofSeq
-        let knn = KNearestNeighbors(2).Learn(embeddedData, Array.zeroCreate<int> (embeddedData.Length))
-        
-        ()
+            |> Common.transpose
+
+        let (distances, indices) =
+            embeddedData
+            |> KNN.DistancesWithIndices 2
+            |> Array.unzip
+
+        let epsilon = Common.stddev (distances |> Array.collect id)
+
+        let rangeMax = (int data.Length) - (delay * (dimension + 1)) - 1
+
+        [| 0 .. rangeMax |]
+        |> Array.filter (fun i ->
+            let distance = distances.[i].[1]
+            let index = indices.[i].[1]
+
+            let flag1 = 0. < distance && distance < epsilon
+
+            let flag2 =
+                let num =
+                    data.[int64(i + dimension * delay)].Value - data.[int64(index + dimension * delay)].Value
+                    |> Math.Abs
+                    |> fun n -> n / distance
+                num > 10.
+
+            flag1 && flag2)
+        |> Array.length

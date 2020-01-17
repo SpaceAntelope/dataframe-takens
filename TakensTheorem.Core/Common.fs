@@ -21,21 +21,30 @@ module Common =
 
     module Dictionary =
         let notIn (dic: IDictionary<'T, _>) (key: 'T) = (dic.ContainsKey >> not) key
-        
+
         let update (key: 'TKey, value: 'TValue) (dic: IDictionary<'TKey, 'TValue>) =
             if key |> notIn dic then dic.Add(key, value) else dic.[key] <- value
-                
+
     // let inline (/!) (key: 'T) (dic: IDictionary<'T, _>): bool = (dic.ContainsKey >> not) key
     // let (!>) (source: DataFrameColumn) = source :?> PrimitiveDataFrameColumn<_>
     // let (!>!) (source: DataFrameColumn) = source :?> StringDataFrameColumn
 
-    let transpose (source: 'a[][]) =
+    let transpose (source: 'a [] []) =
         let length1 = source |> Array.length
-        let length2 = source |> Array.head |> Array.length
+
+        let length2 =
+            source
+            |> Array.head
+            |> Array.length
         Array.init length2 (fun d1 -> Array.init length1 (fun d2 -> source.[d2].[d1]))
 
-    let rec transpose2 = function
-        | (_::_)::_ as M -> List.map List.head M :: transpose2 (List.map List.tail M)
-        | _ -> []        
+    let rec transpose2 =
+        function
+        | (_ :: _) :: _ as M -> List.map List.head M :: transpose2 (List.map List.tail M)
+        | _ -> []
 
-    
+    let stddev (data: float []) =
+        let mean = data |> Array.average
+        data
+        |> Seq.averageBy (fun x -> (x - mean) ** 2.)
+        |> sqrt
