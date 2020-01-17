@@ -15,3 +15,4 @@ Data/*
 TakensTheorem.Test/TestResults
 Notebooks/fsx/paket-files
 Notebooks/fsx/.paket/load
+*/*.fsproj.user
