@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Common.fs" />
@@ -11,22 +11,18 @@
     <Compile Include="DataFrameColumn.fs" />
     <Compile Include="DataFrame.fs" />
     <Compile Include="ZipHelper.fs" />
-    <Compile Include="Chart.fs" />
-    <!-- <None Include="kaggle.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None> -->
+    <Compile Include="Chart.fs" />   
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Accord.MachineLearning" Version="3.8.2-alpha" />
     <PackageReference Include="microsoft.data.analysis" Version="0.2.0" />
-    <!-- <PackageReference Include="numsharp" Version="0.20.4" /> -->
     <PackageReference Include="System.Text.Json" Version="4.7.0" />
     <PackageReference Include="TaskBuilder.fs" Version="2.1.0" />
     <PackageReference Include="XPlot.Plotly" Version="3.0.1" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy bin\Debug\netstandard2.0\TakensTheorem.Core.dll ..\Notebooks\TakensTheorem.Core.dll" />
+    <Exec Command="copy bin\Debug\netstandard2.1\TakensTheorem.Core.dll ..\Notebooks\TakensTheorem.Core.dll" />
   </Target>
 </Project>
