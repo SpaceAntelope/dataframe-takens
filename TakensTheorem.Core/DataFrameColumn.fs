@@ -174,7 +174,7 @@ module DataFrameColumn =
                        as the prexisting indices are matched
                      *)
                     (shortData
-                     |> Filter(conditionBin.[h] /&/ !>(RightShift delay false conditionDelayBin.[k]))
+                     |> Filter(conditionBin.[h] /&/ !> (RightShift delay false conditionDelayBin.[k]))
                      |> Length
                      |> float)
                     / float shortData.Length
