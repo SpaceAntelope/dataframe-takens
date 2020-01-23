@@ -85,21 +85,23 @@ module DataFrameColumnOperators =
     let (/=) (col1: PrimitiveDataFrameColumn<'T>) (value: 'T) = col1.ElementwiseEquals(value = value)
     let (=/) (value: 'T) (col: PrimitiveDataFrameColumn<'T>) = col.ElementwiseEquals(value = value)
     let (/=/) (left: #DataFrameColumn) (right: #DataFrameColumn) = left.ElementwiseEquals(right)
-    // type OverloadInequalities<'T when 'T :> ValueType and 'T: struct and 'T: (new: unit -> 'T)> = EmptyUnionCase
-    //     with
-    //         static member inline (.>) (EmptyUnionCase, (left: PrimitiveDataFrameColumn<'T>, right: 'T)) =
-    //             left.ElementwiseGreaterThan(right)
-    //         static member inline (.>) (EmptyUnionCase, (left: 'T, right: PrimitiveDataFrameColumn<'T>)) =
-    //             right.ElementwiseLessThan(left)
-    //         static member inline (.>) (EmptyUnionCase, (left: DataFrameColumn, right: PrimitiveDataFrameColumn<'T>)) =
-    //             left.ElementwiseGreaterThan(right)
-    //         static member inline (.>) (EmptyUnionCase, (left: PrimitiveDataFrameColumn<'T>, right: DataFrameColumn)) =
-    //             right.ElementwiseLessThan(left)
-    //         static member inline (.>) (EmptyUnionCase,
-    //                                    (left: PrimitiveDataFrameColumn<'T>, right: PrimitiveDataFrameColumn<'T>)) =
-    //             left.ElementwiseGreaterThan(right)
 
-    // let inline (.>.) left right = left .> right
+    
+// type OverloadInequalities<'T when 'T :> ValueType and 'T: struct and 'T: (new: unit -> 'T)> = EmptyUnionCase
+//     with
+//         static member inline (.>) (EmptyUnionCase, (left: PrimitiveDataFrameColumn<'T>, right: 'T)) =
+//             left.ElementwiseGreaterThan(right)
+//         static member inline (.>) (EmptyUnionCase, (left: 'T, right: PrimitiveDataFrameColumn<'T>)) =
+//             right.ElementwiseLessThan(left)
+//         static member inline (.>) (EmptyUnionCase, (left: DataFrameColumn, right: PrimitiveDataFrameColumn<'T>)) =
+//             left.ElementwiseGreaterThan(right)
+//         static member inline (.>) (EmptyUnionCase, (left: PrimitiveDataFrameColumn<'T>, right: DataFrameColumn)) =
+//             right.ElementwiseLessThan(left)
+//         static member inline (.>) (EmptyUnionCase,
+//                                    (left: PrimitiveDataFrameColumn<'T>, right: PrimitiveDataFrameColumn<'T>)) =
+//             left.ElementwiseGreaterThan(right)
+
+// let inline (.>.) left right = left .> right
 
 
 //     type WhatWhat<'T when 'T :> ValueType and 'T: struct and 'T: (new: unit -> 'T)> =

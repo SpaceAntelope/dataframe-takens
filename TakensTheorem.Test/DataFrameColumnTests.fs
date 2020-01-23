@@ -163,4 +163,27 @@ module DataFrameColumnTests =
             |> StringDataFrameColumn.Values
 
         Assert.Equal<string []>(expected, actual)
- 
+
+    [<Fact>]
+    let ``Equality comparison for primitive columns is meaningless``() =
+        let left = [ 1 .. 10 ] |> DataFrameColumn.FromValues ""
+        let right = [ 1 .. 10 ] |> DataFrameColumn.FromValues ""
+        let right' = [20 .. -1 .. 10] |> DataFrameColumn.FromValues ""
+
+        Assert.False((left = right))
+        Assert.False((left = right'))
+
+    [<AbstractClass>]
+    type TestApply() =
+
+        member x.``Apply transformation to column`` (source: 'T [], expected: 'T [],
+                                                     transformation: Func<'T Nullable, int64, 'T Nullable>) =
+
+            let expectedColumn = expected |> DataFrameColumn.FromValues ""
+            let actualColumn = source |> DataFrameColumn.FromValues ""
+
+            actualColumn |> DataFrameColumn.Apply transformation
+
+            let p = expectedColumn = actualColumn
+            ()
+//Assert.True(expectedColumn = actualColumn)

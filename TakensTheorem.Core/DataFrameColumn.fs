@@ -47,7 +47,8 @@ type DataFrameColumn<'T when 'T :> ValueType and 'T: struct and 'T: (new: unit -
 
     static member Plot(source: PrimitiveDataFrameColumn<'T>) = Scatter(y = DataFrameColumn.Values source) |> Chart.Plot
 
-
+    static member Apply (f: Func<'T Nullable, int64, 'T Nullable>) (source: PrimitiveDataFrameColumn<'T>) =
+        source.ApplyElementwise f
 
 [<RequireQualifiedAccess>]
 module StringDataFrameColumn =
@@ -82,6 +83,7 @@ module StringDataFrameColumn =
         |> Seq.map predicate
         |> DataFrameColumn.FromValues(sprintf "%s filter" source.Name)
 
+//let Apply predicate (source: StringDataFrameColumn) = (!<! source).ElementwiseA==========
 
 [<RequireQualifiedAccess>]
 module DataFrameColumn =
@@ -174,7 +176,7 @@ module DataFrameColumn =
                        as the prexisting indices are matched
                      *)
                     (shortData
-                     |> Filter(conditionBin.[h] /&/ !> (RightShift delay false conditionDelayBin.[k]))
+                     |> Filter(conditionBin.[h] /&/ !>(RightShift delay false conditionDelayBin.[k]))
                      |> Length
                      |> float)
                     / float shortData.Length
