@@ -7,11 +7,16 @@
 
   <ItemGroup>
     <Compile Include="Reporter.fs" />
+    <Compile Include="Arguments.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\FsKaggleDatasetDownloader\FsKaggleDatasetDownloader.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Argu" Version="6.0.0" />
   </ItemGroup>
 
 </Project>

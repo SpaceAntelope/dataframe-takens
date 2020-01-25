@@ -29,6 +29,7 @@ module API =
         { DatasetInfo: DatasetInfo
           AuthorizedClient: AuthorizedClient
           DestinationFolder: string
+          Overwrite: bool
           CancellationToken: CancellationToken option
           ReportingCallback: (ReportingData -> unit) option }
     

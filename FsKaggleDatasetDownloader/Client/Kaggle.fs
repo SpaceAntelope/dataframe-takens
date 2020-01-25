@@ -11,7 +11,11 @@ module Kaggle =
             options.DatasetInfo.Request.ToOption() |> Option.defaultValue (options.DatasetInfo.Dataset + ".zip")
         let destinationFile = Path.Combine(options.DestinationFolder, fileName)
 
-        if File.Exists destinationFile then failwithf "File [%s] already exists." destinationFile
+        if File.Exists destinationFile 
+        then
+            if options.Overwrite
+            then File.Delete destinationFile
+            else failwithf "File [%s] already exists." destinationFile
 
         let (AuthorizedClient client) = options.AuthorizedClient
         let token = options.CancellationToken |> Option.defaultValue (CancellationToken())
