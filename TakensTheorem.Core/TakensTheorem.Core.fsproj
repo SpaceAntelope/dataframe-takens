@@ -5,7 +5,6 @@
   <ItemGroup>
     <Compile Include="Common.fs" />
     <Compile Include="KNN.fs" />
-    <Compile Include="KaggleClient.fs" />
     <Compile Include="Takens.fs" />
     <Compile Include="DataFrameColumnOperators.fs" />
     <Compile Include="DataFrameColumn.fs" />
@@ -17,8 +16,6 @@
   <ItemGroup>
     <PackageReference Include="Accord.MachineLearning" Version="3.8.2-alpha" />
     <PackageReference Include="microsoft.data.analysis" Version="0.2.0" />
-    <PackageReference Include="System.Text.Json" Version="4.7.0" />
-    <PackageReference Include="TaskBuilder.fs" Version="2.1.0" />
     <PackageReference Include="XPlot.Plotly" Version="3.0.1" />
   </ItemGroup>
 
