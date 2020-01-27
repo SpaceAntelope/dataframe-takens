@@ -8,8 +8,8 @@ module Reporter =
 
     let ProgressBar (info : ReportingData) = 
         let status =
-            sprintf "Downloading file [%s] -- %dKB of %.02fMB received." (Path.GetFileName(info.DestinationPath).Replace("\\", "/"))
-                info.BytesRead (float info.TotalBytes / 1024.0 / 1024.0)
+            sprintf "Downloading file [%s] -- %dKB of %.02fMB received at %.2fKB/s" (Path.GetFileName(info.Notes).Replace("\\", "/"))
+                info.BytesRead (float info.TotalBytes / 1024.0 / 1024.0) (info.BytesPerSecond/1024.0)
 
         let percentage = float info.BytesRead / float info.TotalBytes
         let barTotalWidth = Console.WindowWidth - 11 - status.Length

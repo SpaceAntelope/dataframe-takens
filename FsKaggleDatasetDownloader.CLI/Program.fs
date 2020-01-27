@@ -25,58 +25,40 @@ module Program =
 
         if fullPath |> (File.Exists >> not) then Directory.CreateDirectory(fullPath) |> ignore
 
-        printf "%s verified..." fullPath
+        //printf "%s verified..." fullPath
         fullPath
 
     [<EntryPoint>]
     let main argv =
-        let errorHandler =
-            ProcessExiter
-                (colorizer =
-                    function
-                    | ErrorCode.HelpText ->
-                        CLI.PrintExamples()
-                        None
-                    | _ -> Some ConsoleColor.Red)
 
-        let parser =
-            ArgumentParser.Create<CLI.Args>(programName = "FsKaggleDatasetDownloader.CLI", errorHandler = errorHandler)
-
-        let results = parser.ParseCommandLine argv
-
-        //printfn "Got parse results %A" <| results.GetAllResults()
+        let results =
+            ArgumentParser.Create<CLI.Args>(programName = "FsKaggleDatasetDownloader.CLI", errorHandler = CLI.arguErrorHandler)
+                .ParseCommandLine argv
 
         let kaggleJsonPath =
-            results.GetResult
-                (CLI.Args.Credentials,
-                 defaultValue =
-                     Path.Combine
-                         (Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".kaggle/kaggle.json"))
+            results
+            |> CLI.ParseKaggleJsonPath
             |> EnsureKaggleJsonExists
+        let destinationFolder =
+            results
+            |> CLI.ParseOutputFolder
+            |> CreateOutputFolderIfMissing
+        let datasetInfo = results |> CLI.ParseDatasetInfo
+        let overwriteEnabled = results |> CLI.ParseOverwrite
+        let whatIfEnabled = results |> CLI.ParseWhatIf
 
-        let destinationFolder = results.GetResult(CLI.Args.Output, defaultValue = ".")
-        let (owner, dataset) = results.GetResult(CLI.Args.Dataset)
-
-        let downloadMode =
-            match results.TryGetResult CLI.Args.File with
-            | Some file -> DatasetFile.Filename file
-            | None -> DatasetFile.CompleteDatasetZipped
-
-        if results.TryGetResult CLI.Args.WhatIf |> Option.isSome then
+        if whatIfEnabled then
             0
         else
             use client = new HttpClient()
 
-            { DatasetInfo =
-                  { Owner = owner
-                    Dataset = dataset
-                    Request = downloadMode }
+            { DatasetInfo = datasetInfo
               AuthorizedClient =
                   kaggleJsonPath
                   |> Credentials.LoadFrom
                   |> Credentials.AuthorizeClient client
               DestinationFolder = destinationFolder
-              Overwrite = results.TryGetResult CLI.Args.Overwrite |> Option.isSome
+              Overwrite = overwriteEnabled
               CancellationToken = None
               ReportingCallback = Some Reporter.ProgressBar }
             |> DownloadDatasetAsync

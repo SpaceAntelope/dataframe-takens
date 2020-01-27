@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <Compile Include="Reporter.fs" />
-    <Compile Include="Arguments.fs" />
+    <Compile Include="CLI.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
