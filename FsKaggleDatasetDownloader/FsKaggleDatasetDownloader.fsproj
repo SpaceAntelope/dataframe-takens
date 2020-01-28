@@ -1,14 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Types/Core.fs" />
-    <Compile Include="Types/Constants.fs" />
-    <Compile Include="Types/API.fs" />
-    <Compile Include="Types/Credentials.fs" />
-    <Compile Include="Client/Core.fs" />
-    <Compile Include="Client/Kaggle.fs" />
+    <Compile Include="Core.fs" />
+    <Compile Include="Kaggle.fs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="System.Text.Json" Version="4.7.0" />

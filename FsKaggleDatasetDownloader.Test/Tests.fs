@@ -6,8 +6,8 @@ open System.Net.Http
 open System.Net
 open System.IO
 open System.Threading
-open FsKaggleDatasetDownloader.Client.Core
-open FsKaggleDatasetDownloader.Types.Core
+open FsKaggleDatasetDownloader.Core
+open FsKaggleDatasetDownloader.Kaggle
 
 [<Fact>]
 let ``DownloadStreamAsync Test Reporting with 1MB``() =
@@ -19,8 +19,7 @@ let ``DownloadStreamAsync Test Reporting with 1MB``() =
 
     let mockHandler =
         { new System.Net.Http.HttpMessageHandler() with
-            member x.SendAsync(request, cancellationToken) = 
-                async { return message } |> Async.StartAsTask }
+            member x.SendAsync(request, cancellationToken) = async { return message } |> Async.StartAsTask }
 
     use client = new HttpClient(mockHandler)
     use memstr = new MemoryStream()
@@ -28,14 +27,24 @@ let ``DownloadStreamAsync Test Reporting with 1MB``() =
     let desiredSamples = 64
     let bufferSize = oneMB / desiredSamples
     let sampleInterval = ByteCount <| int64 bufferSize
+
     let report (info: ReportingData) =
-        Async.Sleep (200)
-        |> Async.RunSynchronously
+        //Async.Sleep(200) |> Async.RunSynchronously
 
         reportResult.Add info
 
-    DownloadStreamAsync "http://localhost" (memstr.WriteAsync) client (CancellationToken()) (Some report)
-        "Test" bufferSize sampleInterval
+    DownloadStreamAsync
+        {
+          BufferLength = bufferSize
+          Url = "http://localhost"
+          Client = client
+          Token = Some(CancellationToken())
+          WriteAsync = memstr.WriteAsync
+          ReportOptions =
+              Some
+                  { ReportTitle = "Test"
+                    SampleInterval = sampleInterval
+                    ReportCallback = report } }
     |> Async.AwaitTask
     |> Async.RunSynchronously
 

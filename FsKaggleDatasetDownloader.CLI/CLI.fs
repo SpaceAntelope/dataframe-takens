@@ -3,7 +3,7 @@ namespace FsKaggleDatasetDownloader.CLI
 open Argu
 open System
 open System.IO
-open FsKaggleDatasetDownloader.Types.API
+open FsKaggleDatasetDownloader.Kaggle
 
 module CLI =
 

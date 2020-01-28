@@ -1,19 +1,17 @@
 ﻿namespace FsKaggleDatasetDownloader.CLI
 
-open FsKaggleDatasetDownloader.Types
-
 module Program =
     open System
     open System.IO
     open System.Net.Http
-    open FsKaggleDatasetDownloader.Types.API
-    open FsKaggleDatasetDownloader.Client.Kaggle
+    open FsKaggleDatasetDownloader.Core
+    open FsKaggleDatasetDownloader.Kaggle
     open Argu
 
     let EnsureKaggleJsonExists path =
-        if path |> (File.Exists >> not) then failwithf "Could not locate credential file in path '%s'" path
-
-        path
+        if path |> (File.Exists >> not) 
+        then failwithf "Could not locate credential file in path '%s'" path
+        else path
 
     let CreateOutputFolderIfMissing(path: string) =
         let fullPath =
