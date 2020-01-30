@@ -96,7 +96,7 @@ module Core =
                 | None -> ()
         }
 
-    let DownloadFileAsync (url: string) destinationPath (client: HttpClient) (cancellationToken: CancellationToken)
+    let DownloadFileAsync (url: string) destinationPath (client: HttpClient) (cancellationToken: CancellationToken option)
         (report: ReportCallback option) =
         let bufferLength = 8192
 
@@ -106,7 +106,7 @@ module Core =
         DownloadStreamAsync
             { Url = url
               Client = client
-              Token = Some cancellationToken
+              Token = cancellationToken
               BufferLength = bufferLength
               WriteAsync = fileStream.WriteAsync
               ReportOptions =
@@ -117,56 +117,3 @@ module Core =
                         SampleInterval = Time <| TimeSpan.FromMilliseconds(350.0) }) }
 
 
-
-// let DownloadFileAsync (url: string) destinationPath (client: HttpClient) (cancellationToken: CancellationToken)
-//     (report: (ReportingData -> unit) option) =
-//     let bufferLength = 8192
-
-//     let sampleInterval = TimeSpan.FromMilliseconds(500.0)
-
-//     task {
-//         use! response = client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
-
-//         response.EnsureSuccessStatusCode() |> ignore
-
-//         let total =
-//             if response.Content.Headers.ContentLength.HasValue
-//             then response.Content.Headers.ContentLength.Value
-//             else -1L
-
-//         use! contentStream = response.Content.ReadAsStreamAsync()
-//         use fileStream =
-//             new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None, bufferLength, true)
-
-//         let mutable totalRead = 0L
-//         let mutable totalReads = 0L
-//         let mutable isMoreToRead = true
-//         let mutable timeOfLastSample = DateTime.Now
-//         let mutable dataSinceLastSample = 0L
-
-//         let buffer = Array.create bufferLength 0uy
-
-//         while isMoreToRead && not cancellationToken.IsCancellationRequested do
-//             let! read = contentStream.ReadAsync(buffer, 0, bufferLength)
-//             if read > 0 then
-//                 do! fileStream.WriteAsync(buffer, 0, read)
-//                 totalRead <- totalRead + int64 read
-//                 dataSinceLastSample <- dataSinceLastSample + int64 read
-//                 totalReads <- totalReads + 1L
-//             else
-//                 isMoreToRead <- false
-
-//             match report with
-//             | Some reportCallback when (timeOfLastSample - DateTime.Now) >= sampleInterval || not isMoreToRead ->
-//                 let bps = float dataSinceLastSample / float (timeOfLastSample - DateTime.Now).Seconds
-
-//                 timeOfLastSample <- DateTime.Now
-//                 dataSinceLastSample <- 0L
-
-//                 reportCallback
-//                     { Notes = destinationPath
-//                       BytesRead = totalRead
-//                       TotalBytes = total
-//                       BytesPerSecond = bps }
-//             | _ -> ()
-//     }
