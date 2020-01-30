@@ -43,12 +43,13 @@ module CLI =
         | [<Unique; AltCommandLine("-f")>] File of string
         | [<Unique>] Overwrite
         | [<Unique>] WhatIf
-        //| [<Unique; AltCommandLine("-ex")>] Examples
+        //| [<Unique;AltCommandLine("-ex")>] Examples
         interface IArgParserTemplate with
             member arg.Usage =
                 match arg with
                 | Credentials _ -> "Path to credentials file, normally kaggle.json. Defaults to ~/.kaggle/kaggle.json"
-                | Dataset _ -> "Mandatory: The name of the dataset and the kaggle user under whom it is published."
+                //| Examples _ -> "Show usage examples."
+                | Dataset _ -> "The name of the dataset and the kaggle user under whom it is published."
                 | Output _ ->
                     "The folder to download the dataset in. If missing we'll attempt to create it. Default is current folder."
                 | File _ ->

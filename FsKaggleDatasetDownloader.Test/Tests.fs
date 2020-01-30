@@ -8,6 +8,7 @@ open System.IO
 open System.Threading
 open FsKaggleDatasetDownloader.Core
 open FsKaggleDatasetDownloader.Kaggle
+open FsKaggleDatasetDownloader.CLI
 open Xunit.Abstractions
 
 module Core =
@@ -145,7 +146,7 @@ module Kaggle =
                         async { return downloadDatasetMsg } |> Async.StartAsTask
                     else
                         failwithf "We don't like %s" request.RequestUri.AbsoluteUri }
-                        //async { return badRequestMsg } |> Async.StartAsTask }
+        //async { return badRequestMsg } |> Async.StartAsTask }
 
         member x.Handler = handler
 
@@ -158,7 +159,7 @@ module Kaggle =
     type KaggleApiTest(outputHelper: ITestOutputHelper, msgHandler: MsgHandlerFixture) =
         let output = outputHelper
         let handler = msgHandler.Handler
-        
+
         let credentialsPath = Path.GetTempFileName()
         let datasetZipPath = Path.Combine(Path.GetTempPath(), "TheDataset.zip")
         let datasetFilePath = Path.Combine(Path.GetTempPath(), "samples.csv")
@@ -191,8 +192,8 @@ module Kaggle =
         member x.``Download dataset file from Kaggle API``() =
             use client = new HttpClient(handler)
 
-            Filename "samples.csv" 
-            |> datasetOptions client 
+            Filename "samples.csv"
+            |> datasetOptions client
             |> DownloadDatasetAsync
             |> Async.RunSynchronously
 
@@ -204,8 +205,8 @@ module Kaggle =
         member x.``Download full dataset from Kaggle API``() =
             use client = new HttpClient(handler)
 
-            CompleteDatasetZipped 
-            |> datasetOptions client 
+            CompleteDatasetZipped
+            |> datasetOptions client
             |> DownloadDatasetAsync
             |> Async.RunSynchronously
 
@@ -219,12 +220,67 @@ module Kaggle =
         interface IDisposable with
             member x.Dispose() = clearFiles()
 
-// { DatasetInfo = ""
-//   AuthorizedClient =
-//       kaggleJsonPath
-//       |> Credentials.LoadFrom
-//       |> Credentials.AuthorizeClient client
-//   DestinationFolder = destinationFolder
-//   Overwrite = overwriteEnabled
-//   CancellationToken = None
-//   ReportingCallback = Some Reporter.ProgressBar }
+module CLI =
+    open Argu
+    open CLI
+
+    [<Fact>]
+    let ``Example: selfishgene historical-hourly-weather-data``() =
+        let args = [| "selfishgene"; "historical-hourly-weather-data" |]
+        let results = ArgumentParser.Create<CLI.Args>().ParseCommandLine args
+
+        let expected =
+            { Owner = args.[0]
+              Dataset = args.[1]
+              Request = CompleteDatasetZipped }
+
+        let actual = ParseDatasetInfo results
+
+        Assert.Equal(expected, actual)
+
+    [<Fact>]
+    let ``Example: selfishgene historical-hourly-weather-data -f humidity.csv``() =
+        let args = [| "selfishgene"; "historical-hourly-weather-data"; "-f"; "humidity.csv" |]
+        let results = ArgumentParser.Create<CLI.Args>().ParseCommandLine args
+
+        let expected =
+            { Owner = args.[0]
+              Dataset = args.[1]
+              Request = Filename "humidity.csv" }
+
+        let actual = ParseDatasetInfo results
+
+        Assert.Equal(expected, actual)
+
+    [<Fact>]
+    let ``Example: selfishgene historical-hourly-weather-data -f humidity.csv -o Data"``() =
+        let args = [| "selfishgene"; "historical-hourly-weather-data"; "-f"; "humidity.csv"; "-o"; "Data" |]
+        let results = ArgumentParser.Create<CLI.Args>().ParseCommandLine args
+
+        let expected =
+                  { Owner = args.[0]
+                    Dataset = args.[1]
+                    Request = Filename args.[3] }
+
+        let actual = ParseDatasetInfo results 
+
+        Assert.Equal(expected, actual)
+        Assert.Equal("Data",ParseOutputFolder results)
+
+
+    [<Fact>]
+    let ``Example: selfishgene historical-hourly-weather-data -f humidity.csv -o Data -c tempFile``() =
+        let kagglePath = Path.GetTempFileName()
+        let args = [| "selfishgene"; "historical-hourly-weather-data";"-f";"humidity.csv";"-o";"Data";"-c";kagglePath |]
+        let results = ArgumentParser.Create<CLI.Args>().ParseCommandLine args
+
+        let expected =
+                  { Owner = args.[0]
+                    Dataset = args.[1]
+                    Request = Filename args.[3] }
+
+        let actual = ParseDatasetInfo results 
+
+        Assert.Equal(expected, actual)
+        Assert.Equal("Data",ParseOutputFolder results)
+        Assert.Equal(kagglePath, ParseKaggleJsonPath results)
