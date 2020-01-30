@@ -73,6 +73,5 @@ module Kaggle =
             else failwithf "File [%s] already exists." destinationFile
 
         let (AuthorizedClient client) = options.AuthorizedClient
-        //let token = options.CancellationToken |> Option.defaultValue (CancellationToken())
 
         DownloadFileAsync url destinationFile client (options.CancellationToken) (options.ReportingCallback)

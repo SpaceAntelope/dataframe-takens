@@ -100,20 +100,24 @@ module Core =
         (report: ReportCallback option) =
         let bufferLength = 8192
 
-        use fileStream =
-            new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None, bufferLength, true)
+        async {
 
-        DownloadStreamAsync
-            { Url = url
-              Client = client
-              Token = cancellationToken
-              BufferLength = bufferLength
-              WriteAsync = fileStream.WriteAsync
-              ReportOptions =
-                  report
-                  |> Option.map (fun callback ->
-                      { ReportTitle = Path.GetFileName(destinationPath)
-                        ReportCallback = callback
-                        SampleInterval = Time <| TimeSpan.FromMilliseconds(350.0) }) }
+            use fileStream =
+                new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None, bufferLength, true)
+
+            do! DownloadStreamAsync
+                    { Url = url
+                      Client = client
+                      Token = cancellationToken
+                      BufferLength = bufferLength
+                      WriteAsync = fileStream.WriteAsync
+                      ReportOptions =
+                          report
+                          |> Option.map (fun callback ->
+                              { ReportTitle = Path.GetFileName(destinationPath)
+                                ReportCallback = callback
+                                SampleInterval = Time <| TimeSpan.FromMilliseconds(350.0) }) }
+                |> Async.AwaitTask                            
+        }
 
 

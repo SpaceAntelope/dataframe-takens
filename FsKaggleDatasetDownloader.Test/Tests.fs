@@ -24,6 +24,7 @@ let ``DownloadStreamAsync Test Progress Reporting with 10MB``() =
 
     use client = new HttpClient(mockHandler)
     use memstr = new MemoryStream()
+    
     let reportResult = ResizeArray<ReportingData>()
     let desiredSamples = 64
     let bufferSize = payloadSize / desiredSamples
@@ -74,10 +75,8 @@ type DownloadFileTest(outputHelper: ITestOutputHelper) =
                 member x.SendAsync(request, cancellationToken) = async { return message } |> Async.StartAsTask }
 
         use client = new HttpClient(mockHandler)
-        let reportResult = ResizeArray<ReportingData>()
 
         DownloadFileAsync "http://0.0.0.0" tempPath client None None
-        |> Async.AwaitTask
         |> Async.RunSynchronously
 
         let fileInfo = FileInfo tempPath

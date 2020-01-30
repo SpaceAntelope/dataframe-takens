@@ -60,7 +60,6 @@ module Program =
               CancellationToken = None
               ReportingCallback = Some Reporter.ProgressBar }
             |> DownloadDatasetAsync
-            |> Async.AwaitTask
             |> Async.RunSynchronously
 
             0 // return an integer exit code
